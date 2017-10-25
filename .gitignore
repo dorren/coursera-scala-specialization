@@ -1,0 +1,6 @@
+.idea
+**/project
+**/target
+**/assignment.sbt
+**/build.sbt
+**/scalastyle/scalastyle_config.xml
