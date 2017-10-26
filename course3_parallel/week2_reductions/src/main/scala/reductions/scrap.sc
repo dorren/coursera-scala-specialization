@@ -12,3 +12,6 @@ val l1 = new Leaf(0, 2, 5)
 val l2 = new Leaf(2, 4, 10)
 val n1 = new Node(l1, l2)
 n1.maxPrevious
+
+val v1 = (1 until 10).par.filter(n => n%3 == 0)
+
