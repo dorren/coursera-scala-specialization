@@ -57,7 +57,6 @@ object ParallelParenthesesBalancing {
 
     def traverse(idx: Int, until: Int, arg1: Int, arg2: Int): (Int, Int) = {
       var acc = 0  // balanced accumulator, just like balance() above.
-      var r = 0    // count unbalanced right parenthesis
       var i = idx
 
       while(i < until){

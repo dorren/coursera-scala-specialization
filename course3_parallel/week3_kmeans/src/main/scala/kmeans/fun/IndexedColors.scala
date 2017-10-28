@@ -9,8 +9,8 @@ case object UniformSampling extends InitialSelectionStrategy
 case object UniformChoice extends InitialSelectionStrategy
 
 abstract sealed trait ConvergenceStrategy
-case class ConvergedWhenSNRAbove(x: Double) extends ConvergenceStrategy
-case class ConvergedAfterNSteps(n: Int) extends ConvergenceStrategy
+case class ConvergedWhenSNRAbove(x: Double)         extends ConvergenceStrategy
+case class ConvergedAfterNSteps(n: Int)             extends ConvergenceStrategy
 case class ConvergedAfterMeansAreStill(eta: Double) extends ConvergenceStrategy
 
 
