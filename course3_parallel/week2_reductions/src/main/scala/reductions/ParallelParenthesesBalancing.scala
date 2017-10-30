@@ -58,17 +58,22 @@ object ParallelParenthesesBalancing {
     def traverse(idx: Int, until: Int, arg1: Int, arg2: Int): (Int, Int) = {
       var acc = 0  // balanced accumulator, just like balance() above.
       var i = idx
+      var r = 0    // count unbalanced ")"
 
       while(i < until){
-        val x = chars(idx)
-        if (acc >=0 && x == '(')
+        val x = chars(i)
+        if (x == '(')
           acc += 1
-
-        else if( x == ')')
-          acc -= 1
+        else if( x == ')') {
+          if(acc > 0)
+            acc -= 1
+          else       // add up unbalanced ")" in variable r.
+            r += 1
+        }
         i += 1
       }
-      (acc, idx)
+      //println("traverse ", chars.toList, idx, until, acc, r)
+      (acc, r)
     }
 
     def reduce(from: Int, until: Int): (Int, Int) = {
@@ -76,15 +81,10 @@ object ParallelParenthesesBalancing {
         traverse(from, until, 0, 0)
       else {
         val mid = (from + until) / 2
-        val ((a1, i1), (a2, i2)) = parallel(reduce(from, mid), reduce(mid, until))
-        //println("reduce A ", chars.toList, from, mid, until, " - ", a1, i1, a2, i2)
-        if(i1 == 0)
-          if(a1 >= 0)
-            (a1 + a2, i1)
-          else
-            (-1000, i1)
-        else
-          (a1 + a2, i1)
+        val ((a1, r1), (a2, r2)) = parallel(reduce(from, mid), reduce(mid, until))
+        //println("reduce A ", chars.toList, from, mid, until, " - ", a1, r1, a2, r2)
+
+        (a1 - r2 + a2, r1)
       }
     }
 

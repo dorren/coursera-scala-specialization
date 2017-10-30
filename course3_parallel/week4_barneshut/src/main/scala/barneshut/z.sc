@@ -6,3 +6,6 @@ var arr = new Array[Int](3)
 
 arr.update(1, 20)
 arr
+
+(1,2,3)
+
