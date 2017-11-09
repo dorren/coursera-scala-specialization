@@ -15,3 +15,10 @@ val p1 = new Point(0.0, 0.0, 0.0)
 val p2 = new Point(0.0, 0.0, 0.0)
 p1.equals(p2)
 p1 == p2
+
+val str = "It's a dog eat dog world"
+val list = str.split(" ").toList
+val map = list.groupBy(x => x).mapValues(_.length)
+val key = map.maxBy(_._2)
+
+
