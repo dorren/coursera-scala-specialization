@@ -21,4 +21,9 @@ val list = str.split(" ").toList
 val map = list.groupBy(x => x).mapValues(_.length)
 val key = map.maxBy(_._2)
 
+import math.round
+val d = 1.36
+round(d * 10) / 10.0
+
+
 

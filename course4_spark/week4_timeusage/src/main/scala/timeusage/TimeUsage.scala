@@ -30,14 +30,26 @@ object TimeUsage {
     val (columns, initDf) = read("/timeusage/atussum.csv")
     val (primaryNeedsColumns, workColumns, otherColumns) = classifiedColumns(columns)
     val summaryDf = timeUsageSummary(primaryNeedsColumns, workColumns, otherColumns, initDf)
-    val finalDf = timeUsageGrouped(summaryDf)
-    finalDf.show()
+    //val finalDf = timeUsageGrouped(summaryDf)
+    //println("dataframe ", finalDf.collect.length)
+    //finalDf.show()
+
+//    // ---- by sql
+//    val finalDf2 = timeUsageGroupedSql(summaryDf)
+//    println("sql ", finalDf2.collect.length)
+//    finalDf2.show
+//
+//    // ---- by dataset
+     val ds = timeUsageSummaryTyped(summaryDf)
+     ds.printSchema
+     println("dataset ", ds.collect.length)
+     ds.show
   }
 
   /** @return The read DataFrame along with its column names. */
   def read(resource: String): (List[String], DataFrame) = {
     val path = fsPath(resource)
-    println("read(), path ", path)
+    //println("read(), path ", path)
     val rdd = spark.sparkContext.textFile(path)
 
     val headerColumns = rdd.first().split(",").to[List]
@@ -111,7 +123,7 @@ object TimeUsage {
     *    “t10”, “t12”, “t13”, “t14”, “t15”, “t16” and “t18” (those which are not part of the previous groups only).
     */
   def classifiedColumns(columnNames: List[String]): (List[Column], List[Column], List[Column]) = {
-    val primaryPrefix = List("t01", "t03", "t11")
+    val primaryPrefix = List("t01", "t03", "t11", "t1801", "t1803")
     val workPrefix    = List("t05", "t1805")
     val leisurePrefix = List("t02", "t04", "t06", "t07", "t08", "t09", "t10", "t12", "t13", "t14", "t15", "t16", "t18")
 
@@ -217,8 +229,9 @@ object TimeUsage {
     summed.groupBy($"working", $"sex", $"age")
       .agg(
         round(avg("primaryNeeds"), 1).as("primaryNeeds"),
-        round(avg($"work"),1).as("work"),
-        round(avg($"other"),1).as("other"))
+        round(avg($"work"),        1).as("work"),
+        round(avg($"other"),       1).as("other"))
+      .sort($"working", $"sex", $"age")
   }
 
   /**
@@ -235,10 +248,13 @@ object TimeUsage {
     * @param viewName Name of the SQL view to use
     */
   def timeUsageGroupedSqlQuery(viewName: String): String =
-    """select working, sex, age, avg(primaryNeeds), avg(work), avg(other) from $viewName
-       where telfs <= 4
-       group by working, sex, age
-    """.stripMargin
+    "SELECT working, sex, age, " +
+    "ROUND(AVG(primaryNeeds),1) AS primaryNeeds, " +
+    "ROUND(AVG(work),1) AS work, " +
+    "ROUND(AVG(other),1) AS other " +
+    s"FROM $viewName " +
+    "GROUP BY working, sex, age " +
+    "ORDER BY working, sex, age "
 
   /**
     * @return A `Dataset[TimeUsageRow]` from the “untyped” `DataFrame`
@@ -247,8 +263,19 @@ object TimeUsage {
     * Hint: you should use the `getAs` method of `Row` to look up columns and
     * cast them at the same time.
     */
-  def timeUsageSummaryTyped(timeUsageSummaryDf: DataFrame): Dataset[TimeUsageRow] =
-    ???
+  def timeUsageSummaryTyped(timeUsageSummaryDf: DataFrame): Dataset[TimeUsageRow] = {
+    timeUsageSummaryDf.as[TimeUsageRow]
+//    timeUsageSummaryDf.map(x => {
+//      TimeUsageRow(
+//        x.getAs[String]("working"),
+//        x.getAs[String]("sex"),
+//        x.getAs[String]("age"),
+//        x.getAs[Double]("primaryNeeds"),
+//        x.getAs[Double]("work"),
+//        x.getAs[Double]("other")
+//      )
+//    })
+  }
 
   /**
     * @return Same as `timeUsageGrouped`, but using the typed API when possible
@@ -263,7 +290,24 @@ object TimeUsage {
     */
   def timeUsageGroupedTyped(summed: Dataset[TimeUsageRow]): Dataset[TimeUsageRow] = {
     import org.apache.spark.sql.expressions.scalalang.typed
-    ???
+    import math.round
+    def myRound(d: Double): Double = round(d * 10.0) / 10.0
+
+    summed.groupByKey(row => (row.working, row.sex, row.age))
+      .agg(
+        typed.avg(_.primaryNeeds),
+        typed.avg(_.work),
+        typed.avg(_.other)
+      )
+      //.as[TimeUsageRow]
+      .map(x => TimeUsageRow(
+        x._1._1,
+        x._1._2,
+        x._1._3,
+        myRound(x._2),
+        myRound(x._3),
+        myRound(x._4))
+      ).sort($"working", $"sex", $"age")
   }
 }
 

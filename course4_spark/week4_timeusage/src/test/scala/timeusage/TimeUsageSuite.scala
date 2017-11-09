@@ -14,12 +14,15 @@ class TimeUsageSuite extends FunSuite with BeforeAndAfterAll {
 
   test("read") {
     val (headers, df) = read("timeusage/atussum.csv")
-    println(headers)
+    // println(headers)
 
     val data = df.take(1).toList
-    println("data", data)
+    // println("data", data)
 
-    println("classifiedColumns", classifiedColumns(headers))
+    // println("classifiedColumns", classifiedColumns(headers))
   }
 
+  test("timeUsageGroupedSql") {
+
+  }
 }
