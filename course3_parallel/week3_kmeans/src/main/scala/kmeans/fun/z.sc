@@ -17,9 +17,7 @@ p1.equals(p2)
 p1 == p2
 
 val str = "It's a dog eat dog world"
-val list = str.split(" ").toList
-val map = list.groupBy(x => x).mapValues(_.length)
-val key = map.maxBy(_._2)
+str.split(" ").groupBy(x => x).mapValues(_.length).maxBy(_._2)
 
 import math.round
 val d = 1.36
