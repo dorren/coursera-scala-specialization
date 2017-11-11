@@ -1,12 +1,26 @@
 package observatory
 
+import java.io.File
+
 import com.sksamuel.scrimage.{Image, Pixel}
+
 import math._
 
 /**
   * 2nd milestone: basic visualization
   */
 object Visualization {
+  val temp2color =
+    Seq(( 60.0, Color(255,255,255)),
+        ( 32.0, Color(255,  0,  0)),
+        ( 12.0, Color(255,255,  0)),
+        (  0.0, Color(  0,255,255)),
+        (-15.0, Color(  0,  0,255)),
+        (-27.0, Color(255,  0,255)),
+        (-50.0, Color( 33,  0,107)),
+        (-60.0, Color(  0,  0,  0))
+      )
+
   // https://en.wikipedia.org/wiki/Great-circle_distance
   // https://www.movable-type.co.uk/scripts/latlong.html
   def greatCircleDistance(l1: Location, l2: Location): Double = {
@@ -92,6 +106,14 @@ object Visualization {
       }
 
     Image(360, 180, pixels.toArray)
+  }
+
+  // write folder if not exist
+  def pathMkdir(path: String): Unit = {
+    val (folder, file) = path.splitAt(path.lastIndexOf("/")+1)
+    val folderFile = new File(folder)
+    if(!folderFile.exists)
+      folderFile.mkdirs
   }
 
 }

@@ -1,6 +1,12 @@
 package observatory
 
+import java.io.File
+
 import com.sksamuel.scrimage.{Image, Pixel}
+import observatory.Extraction.{locateTemperatures, locationYearlyAverageRecords}
+import observatory.Visualization.{interpolateColor, predictTemperature, temp2color, pathMkdir}
+
+import math._
 
 /**
   * 3rd milestone: interactive visualization
@@ -9,10 +15,41 @@ object Interaction {
 
   /**
     * @param tile Tile coordinates
-    * @return The latitude and longitude of the top-left corner of the tile, as per http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+    * @return The latitude and longitude of the top-left corner of the tile,
+    *         as per http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
     */
   def tileLocation(tile: Tile): Location = {
-    ???
+    val divider = pow(2, tile.zoom)
+    val lon = -180 + 360.0 * tile.x / divider
+    val lat = atan(sinh(Pi - 2.0 * Pi * tile.y / divider)).toDegrees
+
+    Location(lat, lon)
+  }
+
+  /**
+    * recursively zoom in and expand tile set.
+    *
+    * @param tile  starting tile
+    * @param depth zoom levels
+    * @return array of zoomed in tiles
+    */
+  def zoomTile(tile: Tile, depth: Int): Iterable[Tile] = {
+    def zoom(tiles: Iterable[Tile], depth: Int): Iterable[Tile] = {
+      if(depth == 0)
+        tiles
+      else{
+        zoom(tiles.flatMap(tile => {
+          Seq(
+            Tile(2 * tile.x,     2 * tile.y,     tile.zoom + 1),
+            Tile(2 * tile.x + 1, 2 * tile.y,     tile.zoom + 1),
+            Tile(2 * tile.x,     2 * tile.y + 1, tile.zoom + 1),
+            Tile(2 * tile.x + 1, 2 * tile.y + 1, tile.zoom + 1)
+          )
+        }), depth - 1)
+      }
+    }
+
+    zoom(Seq(tile), depth).toArray.sortBy(t => (t.y, t.x))
   }
 
   /**
@@ -21,8 +58,35 @@ object Interaction {
     * @param tile Tile coordinates
     * @return A 256×256 image showing the contents of the given tile
     */
-  def tile(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)], tile: Tile): Image = {
-    ???
+  def tile(temperatures: Iterable[(Location, Temperature)],
+           colors:       Iterable[(Temperature, Color)],
+           tile: Tile): Image = {
+    def generatePixel(temperatures: Iterable[(Location, Temperature)],
+                      colors:       Iterable[(Temperature, Color)],
+                      tile: Tile): Pixel = {
+      val loc = tileLocation(tile)
+      val temp = predictTemperature(temperatures, loc)
+      val color = interpolateColor(colors, temp)
+      Pixel(color.red, color.green, color.blue, 127)
+    }
+
+    var counter = 0
+    val pixels = zoomTile(tile, 7).par.map(tile => {
+      counter += 1
+      if(counter % 64 == 0) println("genPixel " + counter + ", " + tile)
+      generatePixel(temperatures, colors, tile)
+    })
+
+    println("tile() " + tile)
+    Image(128, 128, pixels.toArray).scale(2.0)
+  }
+
+  def generateImage(year: Int, t: Tile, temperatures: Iterable[(Location, Temperature)]): Unit = {
+    val image = tile(temperatures, temp2color, t)
+    val path = s"target/temperatures/${year}/${t.zoom}/${t.x}-${t.y}.png"
+    pathMkdir(path)
+    image.output(new File(path))
+    println("generated " + path)
   }
 
   /**
@@ -36,7 +100,20 @@ object Interaction {
     yearlyData: Iterable[(Year, Data)],
     generateImage: (Year, Tile, Data) => Unit
   ): Unit = {
-    ???
+
+    yearlyData.foreach(x => {
+      val (year, avgTemps) = x
+
+      val tiles = (
+        for{ i <- 0 to 3
+        } yield {
+          zoomTile(Tile(0, 0, 0), i)
+        }
+      ).flatten
+
+      println("generateTiles " + tiles.length + " tiles")
+      tiles.foreach(t => generateImage(year, t, avgTemps))
+    })
   }
 
 }
