@@ -3,8 +3,8 @@ package observatory
 import java.io.File
 
 import com.sksamuel.scrimage.{Image, Pixel}
-import observatory.Extraction.{locateTemperatures, locationYearlyAverageRecords}
-import observatory.Visualization.{interpolateColor, predictTemperature, temp2color, pathMkdir}
+import observatory.Extraction._
+import observatory.Visualization._
 
 import math._
 
