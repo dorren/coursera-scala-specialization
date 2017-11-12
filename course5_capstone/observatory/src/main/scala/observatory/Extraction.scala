@@ -105,10 +105,16 @@ object Extraction {
                    .select(tempDF("stn"), tempDF("wban"), $"month", $"day", stnDF("lat"), stnDF("lon"), $"farenheit")
                    .as[TemperatureRow]
 
-    joined.collect.map(r => (LocalDate.of(year, r.month, r.day),
+    println(s"locateTemperatures year: ${year}, joined")
+
+    // the collect part is very costly and could time out spark.
+    // therefore yearlyAverageCombined() combines locateTemperatures() and locationYearlyAverageRecords() to one method.
+    val result = joined.collect.map(r => (LocalDate.of(year, r.month, r.day),
                              Location(r.lat, r.lon),
                              tempConvert(r.farenheit))
                       )
+    println(s"locateTemperatures year: ${year}, len: ${result.length}")
+    result
   }
 
   /**
@@ -121,6 +127,27 @@ object Extraction {
       val temps = list.map(_._3)
       1.0 * temps.sum / temps.size
     })
+  }
+
+  def yearlyAverageCombined(year: Year,
+                            stationsFile: String,
+                            temperaturesFile: String): Iterable[(Location, Temperature)] = {
+    val stnDF = stationDF(stationsFile)
+    val tempDF = temperatureDF(temperaturesFile)
+    import org.apache.spark.sql.expressions.scalalang.typed
+
+    val result = tempDF.join(stnDF, tempDF("stn") === stnDF("stn") && tempDF("wban") === stnDF("wban"), "inner")
+      .select(tempDF("stn"), tempDF("wban"), $"month", $"day", stnDF("lat"), stnDF("lon"), $"farenheit")
+      .as[TemperatureRow]
+      .map(r => (Location(r.lat, r.lon),
+                 tempConvert(r.farenheit))
+      ).groupByKey(_._1)
+      .agg(
+        typed.avg(_._2)
+      ).collect
+
+
+    result
   }
 
 }

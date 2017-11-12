@@ -81,12 +81,22 @@ object Interaction {
     Image(128, 128, pixels.toArray).scale(2.0)
   }
 
+  def imagePath(year:Int, t: Tile): String =
+    s"target/temperatures/${year}/${t.zoom}/${t.x}-${t.y}.png"
+
   def generateImage(year: Int, t: Tile, temperatures: Iterable[(Location, Temperature)]): Unit = {
-    val image = tile(temperatures, temp2color, t)
-    val path = s"target/temperatures/${year}/${t.zoom}/${t.x}-${t.y}.png"
-    pathMkdir(path)
-    image.output(new File(path))
-    println("generated " + path)
+    val path = imagePath(year, t)
+    val file = new File(path)
+
+    if(!file.exists) {
+      val image = tile(temperatures, temp2color, t)
+
+      pathMkdir(path)
+      image.output(new File(path))
+      println("generated " + path)
+    }else{
+      println(s"${path} exists, skip.")
+    }
   }
 
   /**

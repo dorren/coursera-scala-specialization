@@ -38,4 +38,9 @@ trait ExtractionTest extends FunSuite {
     val avgs = locationYearlyAverageRecords(list)
     println(avgs.take(30))
   }
+
+  test("yearlyAverageCombined") {
+    val avgs = yearlyAverageCombined(1975, "/stations.csv", "/1975.csv")
+    println(avgs.take(30))
+  }
 }

@@ -24,7 +24,7 @@ object Manipulation {
     gridTemp
   }
 
-  var globalAverage: RDD[(GridLocation, Temperature)] = spark.sparkContext.parallelize(Seq.empty)
+  var globalAverage: Map[GridLocation, Temperature] = Map.empty
 
   /**
     * @param temperaturess Sequence of known temperatures over the years (each element of the collection
@@ -35,23 +35,19 @@ object Manipulation {
     def calculateTemp(gloc: GridLocation): Temperature = {
       val temps =
         temperaturess.map(yearData => {
-          val sample = yearData.take(1).head
-          println("Manipulate.avg.calc " + sample)
           makeGrid(yearData)(gloc)
         })
       temps.sum / temps.size
     }
 
     def lookupTemp(gloc: GridLocation): Temperature = {
-      println("Manipulate.avg.lookupTemp " + gloc)
-      val list = globalAverage.filter(x => x._1 == gloc).collect
-      if (!list.isEmpty) {
-        list.take(1).head._2
+      // println("Manipulate.avg.lookupTemp " + gloc)
+      val exists = globalAverage.exists(x => x._1 == gloc)
+      if (exists) {
+        globalAverage(gloc)
       }else {
         val temp = calculateTemp(gloc)
-        val newRDD = spark.sparkContext.parallelize(Seq((gloc, temp)))
-        globalAverage = globalAverage.union(newRDD)
-        println("Manipulate.avg.lookupTemp2 " + gloc + ", temp " + temp)
+        globalAverage = globalAverage.updated(gloc, temp)
         temp
       }
     }
@@ -66,7 +62,11 @@ object Manipulation {
     */
   def deviation(temperatures: Iterable[(Location, Temperature)],
                 normals: GridLocation => Temperature): GridLocation => Temperature = {
-    ???
+    def _deviation(gloc: GridLocation): Temperature = {
+      makeGrid(temperatures)(gloc) - normals(gloc)
+    }
+
+    _deviation
   }
 
 

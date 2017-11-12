@@ -67,24 +67,43 @@ object Visualization {
     * @return The color that corresponds to `value`, according to the color scale defined by `points`
     */
   def interpolateColor(points: Iterable[(Temperature, Color)], value: Temperature): Color = {
-    val bottom = points.filter(p => value >= p._1).minBy(p => value - p._1)
+    val bottomList = points.filter(p => value >= p._1)
 
-    if(value == bottom._1)
-      bottom._2
-    else {
-      val list = points.filter(p => p._1 > value)
 
-      if(list.isEmpty)
+//    try {
+//      val bottom = bottomList.minBy(p => value - p._1)
+//    }catch {
+//      case e: java.lang.UnsupportedOperationException => {
+//        println(e.getMessage)
+//        println(s"interpolate error empty, value ${value} \n ${points}")
+//      }
+//      case _ => {
+//        println(s"interpolate error empty, not matched, value ${value} \n ${points}")
+//      }
+//    }
+
+    if (bottomList.isEmpty){
+      val topList = points.filter(p => p._1 > value)
+      topList.minBy(p => p._1 - value)._2
+    }else {
+      val bottom = bottomList.minBy(p => value - p._1)
+      if (value == bottom._1)
         bottom._2
       else {
-        val top = list.minBy(p => p._1 - value)
-        val ratio = 1.0 * (value - bottom._1) / (top._1 - bottom._1)
+        val topList = points.filter(p => p._1 > value)
 
-        Color(
-          bottom._2.red   + round(ratio * (top._2.red   - bottom._2.red)).toInt,
-          bottom._2.green + round(ratio * (top._2.green - bottom._2.green)).toInt,
-          bottom._2.blue  + round(ratio * (top._2.blue  - bottom._2.blue)).toInt
-        )
+        if (topList.isEmpty)
+          bottom._2
+        else {
+          val top = topList.minBy(p => p._1 - value)
+          val ratio = 1.0 * (value - bottom._1) / (top._1 - bottom._1)
+
+          Color(
+            bottom._2.red + round(ratio * (top._2.red - bottom._2.red)).toInt,
+            bottom._2.green + round(ratio * (top._2.green - bottom._2.green)).toInt,
+            bottom._2.blue + round(ratio * (top._2.blue - bottom._2.blue)).toInt
+          )
+        }
       }
     }
   }

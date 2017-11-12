@@ -20,6 +20,11 @@ trait VisualizationTest extends FunSuite with Checkers {
     assert(interpolateColor(temp2color,-27) === Color(255,  0,255))
   }
 
+  test("interpolateColor2"){
+    import Visualization2.deviationColor
+    println(interpolateColor(deviationColor, 1.53))
+  }
+
   test("greatCircleDistance"){
     val d = greatCircleDistance(flushing, la)
     assert(round(d) === 3990)

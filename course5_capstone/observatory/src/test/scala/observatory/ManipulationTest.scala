@@ -24,9 +24,8 @@ trait ManipulationTest extends FunSuite with Checkers {
   }
 
   test("average with csv"){
-    val years = (1975 to 1986).map(year => {
-      val list = locateTemperatures(year, "/stations.csv", s"/${year}.csv")
-      locationYearlyAverageRecords(list)
+    val years = (1975 to 1990).map(year => {
+      yearlyAverageCombined(year, "/stations.csv", s"/${year}.csv")
     })
 
     val gloc = GridLocation(41, -74)

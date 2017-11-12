@@ -1,11 +1,22 @@
 package observatory
 
 import com.sksamuel.scrimage.{Image, Pixel}
+import observatory.Interaction.zoomTile
+import Interaction.tileLocation
+import Visualization.interpolateColor
 
 /**
   * 5th milestone: value-added information visualization
   */
 object Visualization2 {
+  val deviationColor =
+    Seq(( 7.0, Color(255,255,255)),
+        ( 4.0, Color(255,  0,  0)),
+        ( 2.0, Color(255,255,  0)),
+        ( 0.0, Color(255,255,255)),
+        (-2.0, Color(  0,255,255)),
+        (-7.0, Color(  0,  0,255))
+      )
 
   /**
     * @param point (x, y) coordinates of a point in the grid cell
@@ -23,7 +34,10 @@ object Visualization2 {
     d10: Temperature,
     d11: Temperature
   ): Temperature = {
-    ???
+    d00 * (1 - point.x) * (1 - point.y) +
+    d10 *      point.x  * (1 - point.y) +
+    d01 * (1 - point.x) *      point.y  +
+    d11 *      point.x  *      point.y
   }
 
   /**
@@ -37,7 +51,38 @@ object Visualization2 {
     colors: Iterable[(Temperature, Color)],
     tile: Tile
   ): Image = {
-    ???
+    // grid function should be Manipulation.deviation(), which returns temp diff.
+    def generatePixel(grid_fn: GridLocation => Temperature,
+                      colors:  Iterable[(Temperature, Color)],
+                      tile: Tile): Pixel = {
+      val loc = tileLocation(tile)
+      val x0 = loc.lon.floor.toInt
+      val x1 = loc.lon.ceil.toInt
+      val y0 = loc.lat.floor.toInt
+      val y1 = loc.lat.ceil.toInt
+
+
+      val d00 = grid_fn(GridLocation(y0, x0))
+      val d01 = grid_fn(GridLocation(y1, x0))
+      val d10 = grid_fn(GridLocation(y0, x1))
+      val d11 = grid_fn(GridLocation(y1, x1))
+
+      val point = CellPoint(loc.lon - x0, loc.lat - y0)
+      val temp = bilinearInterpolation(point, d00, d01, d10, d11)
+      //println(s"genPixel grid ${x0} ${x1} ${y0} ${y1} ${temp}")
+      val color = interpolateColor(colors, temp)
+      Pixel(color.red, color.green, color.blue, 127)
+    }
+
+    var counter = 0
+    val pixels = zoomTile(tile, 7).par.map(tile => {
+      counter += 1
+      //if(counter % 64 == 0) println("generatePixel " + counter + ", " + tile)
+      generatePixel(grid, colors, tile)
+    })
+
+    println("visualizeGrid() " + tile)
+    Image(128, 128, pixels.toArray).scale(2.0)
   }
 
 }
