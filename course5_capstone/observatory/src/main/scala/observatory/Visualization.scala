@@ -67,7 +67,6 @@ object Visualization {
     * @return The color that corresponds to `value`, according to the color scale defined by `points`
     */
   def interpolateColor(points: Iterable[(Temperature, Color)], value: Temperature): Color = {
-    println(s"interpolateColor ${value}")
     val bottomList = points.filter(p => value >= p._1)
 
     if (bottomList.isEmpty){

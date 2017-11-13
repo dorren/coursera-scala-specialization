@@ -74,7 +74,6 @@ object Interaction {
       generatePixel(temperatures, colors, tile)
     })
 
-    println("tile() " + tile)
     Image(128, 128, pixels.toArray).scale(2.0)
   }
 
@@ -118,7 +117,6 @@ object Interaction {
         }
       ).flatten
 
-      println("generateTiles " + tiles.length + " tiles")
       tiles.foreach(t => generateImage(year, t, avgTemps))
     })
   }

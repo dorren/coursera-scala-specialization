@@ -55,7 +55,9 @@ object Interaction2 {
     * @return The URL pattern to retrieve tiles
     */
   def layerUrlPattern(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
-    println(s"layerURL ${selectedYear()} ${selectedLayer().layerName.getClass.getName} ${selectedLayer().layerName.id} ${selectedLayer().bounds.toList}")
+    println(s"layerURL ${selectedYear()} ${selectedLayer().layerName.getClass.getName} " +
+            s"${selectedLayer().layerName.id} ${selectedLayer().bounds.toList}" +
+            s"${selectedLayer().colorScale}")
     val year = yearSelection(selectedLayer, selectedYear)()
     val tileType = selectedLayer().layerName.id
 
