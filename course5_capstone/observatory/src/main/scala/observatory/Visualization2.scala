@@ -74,14 +74,10 @@ object Visualization2 {
       Pixel(color.red, color.green, color.blue, 127)
     }
 
-    var counter = 0
     val pixels = zoomTile(tile, 7).par.map(tile => {
-      counter += 1
-      //if(counter % 64 == 0) println("generatePixel " + counter + ", " + tile)
       generatePixel(grid, colors, tile)
     })
 
-    println("visualizeGrid() " + tile)
     Image(128, 128, pixels.toArray).scale(2.0)
   }
 

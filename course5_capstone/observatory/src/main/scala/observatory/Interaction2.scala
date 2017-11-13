@@ -36,6 +36,7 @@ object Interaction2 {
     */
   def yearSelection(selectedLayer: Signal[Layer], sliderValue: Signal[Year]): Signal[Year] = {
     val years = yearBounds(selectedLayer)().toList
+    println(s"yearSelection() ${sliderValue()} ${years}")
     val y0 = years.min
     val y1 = years.max
     val x = sliderValue()
@@ -54,16 +55,11 @@ object Interaction2 {
     * @return The URL pattern to retrieve tiles
     */
   def layerUrlPattern(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
-
-    val tileType =
-      selectedLayer().layerName match {
-        case LayerName.Temperatures => "temperatures"
-        case LayerName.Deviations   => "deviations"
-      }
+    println(s"layerURL ${selectedYear()} ${selectedLayer().layerName.id} ${selectedLayer().bounds.toList}")
     val year = yearSelection(selectedLayer, selectedYear)()
-    val location = selectedLayer().layerName.id
+    val tileType = selectedLayer().layerName.id
 
-    Signal(s"build/${tileType}/${year}/0/0-0.png")
+    Signal(s"build/${tileType}/${selectedYear()}/0/0-0.png")
   }
 
   /**
@@ -72,10 +68,11 @@ object Interaction2 {
     * @return The caption to show
     */
   def caption(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
+    println(s"caption() ${selectedLayer().layerName.id} ${selectedYear()}")
     val year = yearSelection(selectedLayer, selectedYear)()
     selectedLayer().layerName match {
-      case LayerName.Temperatures => Signal(s"Temperatures (${year})")
-      case LayerName.Deviations   => Signal(s"Deviations (${year})")
+      case LayerName.Temperatures => Signal(s"Temperatures (${selectedYear()})")
+      case LayerName.Deviations   => Signal(s"Deviations (${selectedYear()})")
       case _                      => Signal("n/a")
     }
   }

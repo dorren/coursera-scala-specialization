@@ -24,6 +24,7 @@ object Extraction {
 
   // For implicit conversions like converting RDDs to DataFrames
   import spark.implicits._
+  spark.sparkContext.setLogLevel("ERROR")
 
   /**
     * convert farenheit temperature to celcius

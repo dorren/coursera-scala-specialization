@@ -67,20 +67,8 @@ object Visualization {
     * @return The color that corresponds to `value`, according to the color scale defined by `points`
     */
   def interpolateColor(points: Iterable[(Temperature, Color)], value: Temperature): Color = {
+    println(s"interpolateColor ${value}")
     val bottomList = points.filter(p => value >= p._1)
-
-
-//    try {
-//      val bottom = bottomList.minBy(p => value - p._1)
-//    }catch {
-//      case e: java.lang.UnsupportedOperationException => {
-//        println(e.getMessage)
-//        println(s"interpolate error empty, value ${value} \n ${points}")
-//      }
-//      case _ => {
-//        println(s"interpolate error empty, not matched, value ${value} \n ${points}")
-//      }
-//    }
 
     if (bottomList.isEmpty){
       val topList = points.filter(p => p._1 > value)

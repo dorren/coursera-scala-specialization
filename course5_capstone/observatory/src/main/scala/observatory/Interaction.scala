@@ -70,10 +70,7 @@ object Interaction {
       Pixel(color.red, color.green, color.blue, 127)
     }
 
-    var counter = 0
     val pixels = zoomTile(tile, 7).par.map(tile => {
-      counter += 1
-      if(counter % 64 == 0) println("genPixel " + counter + ", " + tile)
       generatePixel(temperatures, colors, tile)
     })
 
