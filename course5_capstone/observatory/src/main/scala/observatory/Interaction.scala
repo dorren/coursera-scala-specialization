@@ -82,7 +82,7 @@ object Interaction {
   }
 
   def imagePath(year:Int, t: Tile): String =
-    s"target/temperatures/${year}/${t.zoom}/${t.x}-${t.y}.png"
+    s"build/temperatures/${year}/${t.zoom}/${t.x}-${t.y}.png"
 
   def generateImage(year: Int, t: Tile, temperatures: Iterable[(Location, Temperature)]): Unit = {
     val path = imagePath(year, t)

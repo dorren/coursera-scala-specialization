@@ -5,7 +5,7 @@ import java.io.File
 import com.sksamuel.scrimage.{Image, Pixel}
 
 import math._
-
+import util.control.Breaks.break
 /**
   * 2nd milestone: basic visualization
   */
@@ -45,19 +45,23 @@ object Visualization {
     * @return The predicted temperature at `location`
     */
   def predictTemperature(temperatures: Iterable[(Location, Temperature)], location: Location): Temperature = {
-    val withDist = temperatures.map(t => (t._1, t._2, greatCircleDistance(t._1, location)))
+
+    val withDist = temperatures.map(t => {
+      val d = greatCircleDistance(t._1, location)
+      (t._1, t._2, d)
+    })
     val closeLocations = withDist.filter(x => x._3 <= 1.0)
 
     // https://en.wikipedia.org/wiki/Inverse_distance_weighting
     if(closeLocations.size > 0){
       closeLocations.head._2
     }else {
-      val acc =
-        withDist.foldLeft((0.0, 0.0))((z, x) => {
-          val factor = 1.0 / pow(x._3, 2.0)
-          (z._1 + factor * x._2, z._2 + factor)
-        })
-      acc._1 / acc._2
+      val (top, btm) =
+        withDist.par.map(x => {
+          val factor = 1.0 / (x._3 * x._3)
+          (factor * x._2, factor)
+        }).reduce((a, b) =>(a._1+ b._1, a._2 + b._2))
+      top / btm
     }
   }
 

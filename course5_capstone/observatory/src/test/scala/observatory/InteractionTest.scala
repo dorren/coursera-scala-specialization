@@ -47,10 +47,11 @@ trait InteractionTest extends FunSuite with Checkers {
   }
 
   test("generateTiles"){
-    val list = locateTemperatures(1975, "/stations.csv", "/1975.csv")
-    val avgs = locationYearlyAverageRecords(list)
-
-    generateTiles(Seq((1975, avgs)), generateImage)
+    val years = (2015 to 2015)
+    years.foreach(year => {
+      val avgs = yearlyAverageCombined(year, "/stations.csv", s"/${year}.csv")
+      generateTiles(Seq((year, avgs)), generateImage)
+    })
   }
 
 }

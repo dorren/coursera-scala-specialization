@@ -4,16 +4,20 @@ val capstoneUI =
     .settings(
       scalaVersion := "2.11.8",
       // Add the sources of the main project
-      unmanagedSources in Compile ++= {
-        val rootSourceDirectory = (scalaSource in (root, Compile)).value / "observatory"
-        Seq(
-          rootSourceDirectory / "Interaction2.scala",
-          rootSourceDirectory / "Signal.scala",
-          rootSourceDirectory / "models.scala",
-          rootSourceDirectory / "package.scala"
-        )
-      },
+//      unmanagedSources in Compile ++= {
+//        val rootSourceDirectory = (scalaSource in (root, Compile)).value / "observatory"
+//        Seq(
+//          rootSourceDirectory / "Interaction2.scala",
+//          rootSourceDirectory / "Signal.scala",
+//          rootSourceDirectory / "models.scala",
+//          rootSourceDirectory / "package.scala"
+//        )
+//      },
+      unmanagedSourceDirectories in Compile +=
+        (scalaSource in (root, Compile)).value / "observatory",
       libraryDependencies ++= Seq(
+        "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.6", // for visualization
+        "org.apache.spark" %% "spark-sql" % "2.1.0",
         "org.scala-js" %%% "scalajs-dom" % "0.9.1",
         "com.lihaoyi" %%% "scalatags" % "0.6.0"
       ),

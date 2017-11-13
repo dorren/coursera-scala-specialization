@@ -1,5 +1,8 @@
 package observatory
 
+import observatory.Visualization.temp2color
+import observatory.Visualization2.deviationColor
+
 /**
   * 6th (and last) milestone: user interface polishing
   */
@@ -9,7 +12,10 @@ object Interaction2 {
     * @return The available layers of the application
     */
   def availableLayers: Seq[Layer] = {
-    ???
+    val temperatureLayer = Layer(LayerName.Temperatures, temp2color, (1975 to 2015))
+    val deviationLayer   = Layer(LayerName.Deviations,   deviationColor, (1991 to 2015))
+
+    Seq(temperatureLayer, deviationLayer)
   }
 
   /**
@@ -17,7 +23,7 @@ object Interaction2 {
     * @return A signal containing the year bounds corresponding to the selected layer
     */
   def yearBounds(selectedLayer: Signal[Layer]): Signal[Range] = {
-    ???
+    Signal(selectedLayer().bounds)
   }
 
   /**
@@ -29,7 +35,17 @@ object Interaction2 {
     *         in the `selectedLayer` bounds.
     */
   def yearSelection(selectedLayer: Signal[Layer], sliderValue: Signal[Year]): Signal[Year] = {
-    ???
+    val years = yearBounds(selectedLayer)().toList
+    val y0 = years.head
+    val y1 = years.last
+    val x = sliderValue()
+
+    if(x <= y0)
+      Signal(y0)
+    else if (x >= y1)
+      Signal(y1)
+    else
+      Signal(x)
   }
 
   /**
@@ -38,7 +54,15 @@ object Interaction2 {
     * @return The URL pattern to retrieve tiles
     */
   def layerUrlPattern(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
-    ???
+    val tileType =
+      selectedLayer().layerName match {
+        case LayerName.Temperatures => "temperatures"
+        case LayerName.Deviations   => "deviations"
+      }
+    val year = selectedYear()
+    val location = selectedLayer().layerName.id
+
+    Signal(s"build/${tileType}/${year}/0/0-0.png")
   }
 
   /**
@@ -47,7 +71,12 @@ object Interaction2 {
     * @return The caption to show
     */
   def caption(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
-    ???
+    val year = yearSelection(selectedLayer, selectedYear)()
+    selectedLayer().layerName match {
+      case LayerName.Temperatures => Signal(s"Temperatures (${year})")
+      case LayerName.Deviations   => Signal(s"Deviations (${year})")
+      case _                      => Signal("n/a")
+    }
   }
 
 }

@@ -1,16 +1,16 @@
 package observatory
 
 import leaflet.{L, MapOptions, ZoomOptions}
+import org.scalajs.dom.html.Input
+import org.scalajs.dom.{Event, Node, document}
 
 import scala.scalajs.js
-import org.scalajs.dom.{Element, Event, Node, document}
-import org.scalajs.dom.html.Input
-
+import scalatags.JsDom._
 import scalatags.{DataConverters, LowPriorityImplicits}
-import scalatags.JsDom.{Cap, Aggregate, tags, attrs, styles}
 
 object Implicits extends Cap with Aggregate with DataConverters with LowPriorityImplicits
-import Implicits._
+import observatory.Implicits._
+
 
 object JSMain extends js.JSApp {
 
