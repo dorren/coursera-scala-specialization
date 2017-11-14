@@ -59,10 +59,13 @@ object Interaction2 {
             s"${selectedLayer().layerName.id} ${selectedLayer().bounds.toList}" +
             s"${selectedLayer().colorScale}")
     val year = yearSelection(selectedLayer, selectedYear)()
-    val tileType = selectedLayer().layerName.id
+    val tileType = selectedLayer().layerName match {
+        case LayerName.Temperatures => "temperatures"
+        case LayerName.Deviations   => "deviations"
+        case _                      => "unknown"
+      }
 
-    // for auto grader, should be ${tileType}
-    Signal(s"build/deviations/${selectedYear()}/0/0-0.png")
+    Signal(s"build/${tileType}/${selectedYear()}/0/0-0.png")
   }
 
   /**
@@ -71,11 +74,12 @@ object Interaction2 {
     * @return The caption to show
     */
   def caption(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
-    println(s"caption() ${selectedLayer().layerName.getClass.getName} ${selectedLayer().layerName.id} ${selectedYear()}")
+    println(s"caption() ${selectedLayer().layerName.getClass.getName} " +
+            s"${selectedLayer().layerName.id} ${selectedYear()}" +
+            s"${selectedLayer().colorScale}")
 
     selectedLayer().layerName match {
-                                         // for auto grader, should be "Temperatures"
-      case LayerName.Temperatures => Signal(s"Deviations (${selectedYear()})")
+      case LayerName.Temperatures => Signal(s"Temperatures (${selectedYear()})")
       case LayerName.Deviations   => Signal(s"Deviations (${selectedYear()})")
       case _                      => Signal("n/a")
     }

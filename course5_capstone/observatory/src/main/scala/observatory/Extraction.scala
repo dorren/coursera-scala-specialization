@@ -9,11 +9,12 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.types._
 
 import math.round
-
+import org.apache.log4j.{Level, Logger}
 /**
   * 1st milestone: data extraction
   */
 object Extraction {
+  Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
 
   val spark: SparkSession =
     SparkSession
@@ -25,6 +26,7 @@ object Extraction {
   // For implicit conversions like converting RDDs to DataFrames
   import spark.implicits._
   spark.sparkContext.setLogLevel("ERROR")
+
 
   /**
     * convert farenheit temperature to celcius
