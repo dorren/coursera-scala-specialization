@@ -14,7 +14,7 @@ import org.apache.log4j.{Level, Logger}
   * 1st milestone: data extraction
   */
 object Extraction {
-  Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
+  //Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
 
   val spark: SparkSession =
     SparkSession
@@ -102,12 +102,6 @@ object Extraction {
     val joined = tempDF.join(stnDF, cond, "inner")
                    .select(tempDF("stn"), tempDF("wban"), $"month", $"day", stnDF("lat"), stnDF("lon"), $"farenheit")
                    .as[TemperatureRow]
-
-
-    println(s"locateTemperatures year: ${year}, joined")
-    stnDF.show
-    tempDF.show
-    joined.show
 
     // the collect part is very costly and could time out spark.
     // therefore yearlyAverageCombined() combines locateTemperatures() and locationYearlyAverageRecords() to one method.

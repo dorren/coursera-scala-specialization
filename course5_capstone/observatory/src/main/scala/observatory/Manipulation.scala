@@ -24,6 +24,7 @@ object Manipulation {
     gridTemp
   }
 
+  
   var globalAverage: Map[GridLocation, Temperature] = Map.empty
 
   /**
