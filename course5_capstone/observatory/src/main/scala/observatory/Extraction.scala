@@ -73,8 +73,10 @@ object Extraction {
   def stationDF(stationsFile: String): DataFrame = {
     if(_stationDF == null) {
       val stationRDD = readFile(stationsFile)
+      println(s"stationDF\n${stationRDD.collect.toList}")
+
       val data = stationRDD.map(_.split(",").to[List])
-        .filter(x => x.length == 4 && x(2).toDouble != 0 && x(3).toDouble != 0)
+        .filter(x => x.length == 4)
         .map(x => Row.fromSeq(Seq(x(0), x(1), x(2).toDouble, x(3).toDouble)))
 
       _stationDF = spark.createDataFrame(data, stationSchema)

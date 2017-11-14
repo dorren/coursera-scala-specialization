@@ -67,7 +67,7 @@ object Visualization2 {
       val d10 = grid_fn(GridLocation(y0, x1))
       val d11 = grid_fn(GridLocation(y1, x1))
 
-      val point = CellPoint(loc.lon - x0, loc.lat - y0)
+      val point = CellPoint(loc.lon - x0, y1 - loc.lat)
       val temp = bilinearInterpolation(point, d00, d01, d10, d11)
       //println(s"genPixel grid ${x0} ${x1} ${y0} ${y1} ${temp}")
       val color = interpolateColor(colors, temp)
