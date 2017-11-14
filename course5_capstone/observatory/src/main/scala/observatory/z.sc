@@ -33,6 +33,3 @@ import org.scalatest.Matchers._
 import java.io.File
 val file = new File("target/xyz/abc.txt")
 file.exists()
-
-
-

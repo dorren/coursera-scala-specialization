@@ -23,6 +23,18 @@ trait ManipulationTest extends FunSuite with Checkers {
     assert(actual === 4.5 +- 0.01)
   }
 
+  test("average reset cache"){
+    val years = Seq(temperatures, temperatures)
+    val gloc = GridLocation(41, -74)
+    val actual = average(years)(gloc)
+
+
+    val years2 = Seq(temperatures)
+    val actual2 = average(years)(gloc)
+
+    assert(actual2 === 4.5 +- 0.01)
+  }
+
   test("average with csv"){
     val years = (1975 to 1990).map(year => {
       yearlyAverageCombined(year, "/stations.csv", s"/${year}.csv")

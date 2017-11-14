@@ -57,7 +57,8 @@ object Visualization {
           val factor = 1.0 / pow(x._3, 2.0)
           (z._1 + factor * x._2, z._2 + factor)
         })
-      acc._1 / acc._2
+      val result = acc._1 / acc._2
+      result
     }
   }
 
@@ -85,11 +86,13 @@ object Visualization {
           val top = topList.minBy(p => p._1 - value)
           val ratio = 1.0 * (value - bottom._1) / (top._1 - bottom._1)
 
-          Color(
-            bottom._2.red + round(ratio * (top._2.red - bottom._2.red)).toInt,
+          val color = Color(
+            bottom._2.red   + round(ratio * (top._2.red   - bottom._2.red)).toInt,
             bottom._2.green + round(ratio * (top._2.green - bottom._2.green)).toInt,
-            bottom._2.blue + round(ratio * (top._2.blue - bottom._2.blue)).toInt
+            bottom._2.blue  + round(ratio * (top._2.blue  - bottom._2.blue)).toInt
           )
+
+          color
         }
       }
     }
