@@ -22,9 +22,27 @@ trait ExtractionTest extends FunSuite {
     df.show
   }
 
+  test("test stationDF") {
+    val df = stationDF("/stations_test.csv")
+    df.show
+  }
+
   test("temperatureDF") {
     val df = temperatureDF("/1975.csv")
     df.show
+  }
+
+  test("test temperatureDF") {
+    import org.apache.spark.sql.functions._
+    val stnDF = stationDF("/stations_test.csv")
+    val tempDF = temperatureDF("/temps_5_test.csv")
+    tempDF.show
+  }
+
+  test("test locateTemperatures") {
+    val list = locateTemperatures(1975, "/stations_test.csv", "/temps_5_test.csv")
+    println("locateTemperatures " + list.size)
+    println(list.take(30))
   }
 
   test("locateTemperatures") {

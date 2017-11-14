@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 import org.apache.spark
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.apache.spark.sql.types._
 
 import math.round
@@ -68,21 +68,14 @@ object Extraction {
     )
   }
 
-  var _stationDF: DataFrame = null
-
   def stationDF(stationsFile: String): DataFrame = {
-    if(_stationDF == null) {
-      val stationRDD = readFile(stationsFile)
-      println(s"stationDF\n${stationRDD.collect.toList}")
+    val stationRDD = readFile(stationsFile)
 
-      val data = stationRDD.map(_.split(",").to[List])
-        .filter(x => x.length == 4)
-        .map(x => Row.fromSeq(Seq(x(0), x(1), x(2).toDouble, x(3).toDouble)))
+    val data = stationRDD.map(_.split(",").to[List])
+      .filter(x => x.length == 4)
+      .map(x => Row.fromSeq(Seq(x(0), x(1), x(2).toDouble, x(3).toDouble)))
 
-      _stationDF = spark.createDataFrame(data, stationSchema)
-    }
-
-    _stationDF
+    spark.createDataFrame(data, stationSchema)
   }
 
   def temperatureDF(temperaturesFile: String): DataFrame = {
@@ -105,12 +98,17 @@ object Extraction {
     val stnDF = stationDF(stationsFile)
     val tempDF = temperatureDF(temperaturesFile)
 
-
-    val joined = tempDF.join(stnDF, tempDF("stn") === stnDF("stn") && tempDF("wban") === stnDF("wban"), "inner")
+    val cond = (tempDF("stn") === stnDF("stn") && tempDF("wban") === stnDF("wban")) ||
+               (tempDF("stn") === stnDF("stn"))
+    val joined = tempDF.join(stnDF, cond, "inner")
                    .select(tempDF("stn"), tempDF("wban"), $"month", $"day", stnDF("lat"), stnDF("lon"), $"farenheit")
                    .as[TemperatureRow]
 
+
     println(s"locateTemperatures year: ${year}, joined")
+    stnDF.show
+    tempDF.show
+    joined.show
 
     // the collect part is very costly and could time out spark.
     // therefore yearlyAverageCombined() combines locateTemperatures() and locationYearlyAverageRecords() to one method.
@@ -118,7 +116,6 @@ object Extraction {
                              Location(r.lat, r.lon),
                              tempConvert(r.farenheit))
                       )
-    println(s"locateTemperatures year: ${year}, len: ${result.length}")
     result
   }
 
