@@ -36,7 +36,7 @@ trait ManipulationTest extends FunSuite with Checkers {
   }
 
   test("average with csv"){
-    val years = (1975 to 1990).map(year => {
+    val years = (1975 to 1975).map(year => {
       yearlyAverageCombined(year, "/stations.csv", s"/${year}.csv")
     })
 

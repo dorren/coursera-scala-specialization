@@ -8,7 +8,7 @@ import org.apache.spark.rdd.RDD
   * 4th milestone: value-added information
   */
 object Manipulation {
-  val spark = Extraction.spark
+  var gridCache: Map[Int, Map[GridLocation, Temperature]] = Map.empty
 
   /**
     * @param temperatures Known temperatures
@@ -16,16 +16,30 @@ object Manipulation {
     *         returns the predicted temperature at this location
     */
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
-    def gridTemp(gloc: GridLocation): Temperature = {
-      val loc = Location(gloc.lat, gloc.lon)
-      Visualization.predictTemperature(temperatures, loc)
-    }
+    val key = temperatures.hashCode
+    if (gridCache.exists(x => x._1 == key))
+      gridCache(key)
+    else {
+      println(s"makeGrid ${temperatures}")
+      val grid = (for {
+        y <- -89 to 90
+        x <- -180 to 179
+      } yield {
+        if(x == 0)
+          println(s"makegrid ${x},${y}")
+        val gloc = GridLocation(y, x)
+        val temp = Visualization.predictTemperature(temperatures, Location(gloc.lat, gloc.lon))
+        (gloc, temp)
+      }).toMap
 
-    gridTemp
+      gridCache = gridCache.updated(key, grid)
+
+      (gloc: GridLocation) => {
+        grid(gloc)
+      }
+    }
   }
 
-  
-  var globalAverage: Map[GridLocation, Temperature] = Map.empty
 
   /**
     * @param temperaturess Sequence of known temperatures over the years (each element of the collection
@@ -33,26 +47,14 @@ object Manipulation {
     * @return A function that, given a latitude and a longitude, returns the average temperature at this location
     */
   def average(temperaturess: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature = {
+    val grids = temperaturess.map(x => makeGrid(x))
+
     def calculateTemp(gloc: GridLocation): Temperature = {
-      val temps =
-        temperaturess.map(yearData => {
-          makeGrid(yearData)(gloc)
-        })
+      val temps = grids.map(_(gloc))
       temps.sum / temps.size
     }
 
-    def lookupTemp(gloc: GridLocation): Temperature = {
-      val exists = globalAverage.exists(x => x._1 == gloc)
-      if (exists) {
-        globalAverage(gloc)
-      }else {
-        val temp = calculateTemp(gloc)
-        globalAverage = globalAverage.updated(gloc, temp)
-        temp
-      }
-    }
-
-    lookupTemp
+    calculateTemp
   }
 
   /**
