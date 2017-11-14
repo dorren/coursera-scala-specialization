@@ -41,7 +41,6 @@ object Manipulation {
     }
 
     def lookupTemp(gloc: GridLocation): Temperature = {
-      // println("Manipulate.avg.lookupTemp " + gloc)
       val exists = globalAverage.exists(x => x._1 == gloc)
       if (exists) {
         globalAverage(gloc)

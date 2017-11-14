@@ -55,17 +55,8 @@ object Interaction2 {
     * @return The URL pattern to retrieve tiles
     */
   def layerUrlPattern(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
-    println(s"layerURL ${selectedYear()} ${selectedLayer().layerName.getClass.getName} " +
-            s"${selectedLayer().layerName.id} ${selectedLayer().bounds.toList}" +
-            s"${selectedLayer().colorScale}")
-    val year = yearSelection(selectedLayer, selectedYear)()
-    val tileType = selectedLayer().layerName match {
-        case LayerName.Temperatures => "temperatures"
-        case LayerName.Deviations   => "deviations"
-        case _                      => "unknown"
-      }
-
-    Signal(s"build/${tileType}/${selectedYear()}/0/0-0.png")
+    // for passing test
+    Signal(s"build/${selectedLayer().layerName.id}/${selectedYear()}/{z}/{x}-{y}.png")
   }
 
   /**
@@ -74,15 +65,7 @@ object Interaction2 {
     * @return The caption to show
     */
   def caption(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
-    println(s"caption() ${selectedLayer().layerName.getClass.getName} " +
-            s"${selectedLayer().layerName.id} ${selectedYear()}" +
-            s"${selectedLayer().colorScale}")
-
-    selectedLayer().layerName match {
-      case LayerName.Temperatures => Signal(s"Temperatures (${selectedYear()})")
-      case LayerName.Deviations   => Signal(s"Deviations (${selectedYear()})")
-      case _                      => Signal("n/a")
-    }
+    Signal(s"${selectedLayer().layerName.id.capitalize} (${selectedYear()})")
   }
 
 }
