@@ -98,8 +98,7 @@ object Extraction {
     val stnDF = stationDF(stationsFile)
     val tempDF = temperatureDF(temperaturesFile)
 
-    val cond = (tempDF("stn") === stnDF("stn") && tempDF("wban") === stnDF("wban")) ||
-               (tempDF("stn") === stnDF("stn"))
+    val cond = tempDF("stn") === stnDF("stn") && tempDF("wban") === stnDF("wban")
     val joined = tempDF.join(stnDF, cond, "inner")
                    .select(tempDF("stn"), tempDF("wban"), $"month", $"day", stnDF("lat"), stnDF("lon"), $"farenheit")
                    .as[TemperatureRow]
