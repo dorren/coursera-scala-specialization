@@ -52,13 +52,12 @@ object Visualization {
     if(closeLocations.size > 0){
       closeLocations.head._2
     }else {
-      val acc =
-        withDist.foldLeft((0.0, 0.0))((z, x) => {
-          val factor = 1.0 / pow(x._3, 2.0)
-          (z._1 + factor * x._2, z._2 + factor)
-        })
-      val result = acc._1 / acc._2
-      result
+      val (top, btm) =
+        withDist.map(x => {
+          val factor = 1.0 / (x._3 * x._3)
+          (factor * x._2, factor)
+        }).reduce((a, b) =>(a._1+ b._1, a._2 + b._2))
+      top / btm
     }
   }
 

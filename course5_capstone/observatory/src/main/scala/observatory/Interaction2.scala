@@ -46,7 +46,7 @@ object Interaction2 {
     else if (x > y1)
       Signal(y1)
     else
-      Signal(x)
+      sliderValue
   }
 
   /**

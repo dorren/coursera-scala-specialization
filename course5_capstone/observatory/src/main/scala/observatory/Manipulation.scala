@@ -20,13 +20,12 @@ object Manipulation {
     if (gridCache.exists(x => x._1 == key))
       gridCache(key)
     else {
-      println(s"makeGrid ${temperatures}")
       val grid = (for {
         y <- -89 to 90
         x <- -180 to 179
       } yield {
-        if(x == 0)
-          println(s"makegrid ${x},${y}")
+//        if(x == 0)
+//          println(s"makegrid ${x},${y}")
         val gloc = GridLocation(y, x)
         val temp = Visualization.predictTemperature(temperatures, Location(gloc.lat, gloc.lon))
         (gloc, temp)
